@@ -1,32 +1,12 @@
-
-'''
-# Import socket module
+import os
+import re
 import socket
-
-# Create a socket object
-s = socket.socket()
-
-# Define the port on which you want to connect
-port = 8008
-
-# connect to the server on local computer
-s.connect(('127.0.0.1', port))
-
-# receive data from the server
-print(s.recv(1024))
-
-# close the connection
-s.close()
-'''
 
 contactlist  = {
     'homepc': '3C:7C:3F:22:DC:E2',
     'macbook': '1a:50:63:84:da:64'
 }
 
-import os
-import re
-import socket
 
 def macchooserfromcontacts() ->str:
     while True:
