@@ -1,6 +1,8 @@
 import socket
 ## TODO make alot better as per freeform spec
-def connect():
+
+
+def receiver():
     wifilink = socket.socket()
     port = 8008
     wifilink.bind(('', port))
@@ -23,4 +25,4 @@ def connect():
 
 
 if __name__ == '__main__':
-    connect()
+    receiver()

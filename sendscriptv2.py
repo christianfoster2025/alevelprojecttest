@@ -1,14 +1,13 @@
-import os
-import re
-import socket
+import os, re, socket
 
-contactlist  = {
+
+contactlist  = { # temporary will need to be removed
     'homepc': '3C:7C:3F:22:DC:E2',
     'macbook': '1a:50:63:84:da:64'
 }
 
 
-def macchooserfromcontacts() ->str:
+def Contact2MAC() ->str:
     while True:
         print('choose who to send to from the following:')
         for contact in contactlist:
@@ -17,7 +16,7 @@ def macchooserfromcontacts() ->str:
         if choice in contactlist:
             return contactlist[choice]
 
-def get_ip_from_mac(mac_address:str):
+def MACtoIP(mac_address:str): #uses lookup table on device to find local ip of device wanted 
     # Get the ARP table
     arp_table = os.popen('arp -a').read()
     # Search for the MAC address in the ARP table
@@ -26,15 +25,9 @@ def get_ip_from_mac(mac_address:str):
             # Extract the IP address
             ip_address = re.findall(r'\d+\.\d+\.\d+\.\d+', line)
             if ip_address:
-                print(ip_address[0])
                 return ip_address[0]
             
-    return int(a)
-
-def fromcontacttolocalip(): 
-    macaddress = macchooserfromcontacts()
-    ip = get_ip_from_mac(macaddress)
-    return str(ip)
+    return int(a) # need to fix
 
 def wifisendmodule(ipaddress, message):
     wifilink = socket.socket()
@@ -49,16 +42,43 @@ def wifisendmodule(ipaddress, message):
 
         # close the connection
         wifilink.close()
-        print('sent')
+        return True
     except ConnectionRefusedError:
         print('client not online')
+        return False
+    
 
-def sendscript(message,receiver): # receiver has to be one of either homepc or macbook and message has to be a string 
-    ipaddress = get_ip_from_mac(contactlist[receiver])
+def sendscript(message:str,macaddress): # receiver has to be one of either homepc or macbook and message has to be a string TODO implement DB here
+    ipaddress = MACtoIP(macaddress)
+    message= message.encode('ascii')
     wifisendmodule(ipaddress,message)
 
 
+#tester script
+
+
 if __name__ == '__main__':
-    message = input('input message:').encode('ascii') #needs and endwith''
-    ip = fromcontacttolocalip()
-    wifisendmodule(ip,message)
+    macaddress= ''
+    while True:
+        print('choose who to send to from the following:')
+        for contact in contactlist:
+            print(contact)
+        choice = input()
+        if choice in contactlist:
+            macaddress= contactlist[choice]
+            break
+        
+    message = input('enter message:')
+    sendscript(message, macaddress)
+    
+
+
+# script takes in mac address, 
+# gets local ip
+
+# then gets message
+# encrypts 
+#connects
+#sends 
+# closes
+
