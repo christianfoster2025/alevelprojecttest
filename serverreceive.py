@@ -14,7 +14,7 @@ def connect():
         #print ('Got connection from', addr )
         receivedmessage =str(c.recv(1024))
         
-        print(f'{addr}: {receivedmessage}')
+        print(f'{addr}: {receivedmessage[2:-1]}')
         # send a thank you message to the client.
         
 
