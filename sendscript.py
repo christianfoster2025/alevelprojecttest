@@ -21,7 +21,7 @@ s.close()
 
 contactlist  = {
     'homepc': '3C:7C:3F:22:DC:E2',
-    'macbook': 'ac:07:75:09:48:67'
+    'macbook': '1a:50:63:84:da:64'
 }
 
 import os
@@ -37,22 +37,24 @@ def macchooserfromcontacts() ->str:
         if choice in contactlist:
             return contactlist[choice]
 
-def get_ip_from_mac(mac_address):
+def get_ip_from_mac(mac_address:str):
     # Get the ARP table
     arp_table = os.popen('arp -a').read()
     # Search for the MAC address in the ARP table
     for line in arp_table.splitlines():
-        if mac_address.lower() in line.lower():
+        if mac_address.lower() in line.lower() or mac_address.lower().replace(':','-') in line.lower():
             # Extract the IP address
             ip_address = re.findall(r'\d+\.\d+\.\d+\.\d+', line)
             if ip_address:
+                print(ip_address[0])
                 return ip_address[0]
-    return None
+            
+    return int(a)
 
 def fromcontacttolocalip():
     macaddress = macchooserfromcontacts()
     ip = get_ip_from_mac(macaddress)
-    return ip
+    return str(ip)
 
 def wifisendmodule(ipaddress, message):
     wifilink = socket.socket()
@@ -72,7 +74,7 @@ def wifisendmodule(ipaddress, message):
         print('client not online')
 
 
-if __name__ == '__main___':
-    message = input('input message:',end='')
+if __name__ == '__main__':
+    message = input('input message:').encode('ascii') #needs and endwith''
     ip = fromcontacttolocalip()
     wifisendmodule(ip,message)
