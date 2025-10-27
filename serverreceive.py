@@ -1,0 +1,24 @@
+import socket
+## TODO make alot better as per freeform spec
+def connect():
+    wifilink = socket.socket()
+    port = 8008
+    wifilink.bind(('', port))
+    print ("socket binded to %s" %(port))
+    wifilink.listen(5)    
+    print ("socket is listening")
+
+    while True:
+        # Establish connection with client.
+        c, addr = wifilink.accept()
+        print ('Got connection from', addr )
+        print(c.recv(1024))
+        # send a thank you message to the client.
+        
+
+        # Close the connection with the client
+        c.close()
+
+
+if __name__ == '__main__':
+    connect()
