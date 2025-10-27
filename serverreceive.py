@@ -11,8 +11,10 @@ def connect():
     while True:
         # Establish connection with client.
         c, addr = wifilink.accept()
-        print ('Got connection from', addr )
-        print(c.recv(1024))
+        #print ('Got connection from', addr )
+        receivedmessage =str(c.recv(1024))
+        
+        print(f'{addr}: {receivedmessage}')
         # send a thank you message to the client.
         
 
