@@ -1,7 +1,4 @@
 FUNCTION new_credentials_add (username,password,confirmpassowrd) returns bool
-    INPUT username
-    INPUT password
-    INPUT confirmpassword
     if password != confirmpassword OR username.isempty() or password.isempty()
         return False
     endif 
@@ -12,35 +9,67 @@ FUNCTION new_credentials_add (username,password,confirmpassowrd) returns bool
         return false
     else 
         RUN SQL ''' INSERT INTO users VALUES (username,password)
-        close CONNECTR
+        close CONNECT
         return true
     endif
+endFUNCTION
+
+FUNCTION login (username,password) returns bool 
+    var string hashed_password = '' 
+    hashed_password = FUNCTION hasher(password)
+    CONNECT to 'users.db'
+    RUN SQL ''' SELECT * FROM users WHERE username LIKE'{username}' AND password LIKE '{hashed_password}' '''
+    if SQL returns RESULT then
+        return True
+    else 
+        return False
+    endif
+endFUNCTION
 
 
 PROCEDURE startup() returns none
     #start with DB check
-    if path users.db exists then
-        continue
-    else 
+    if path users.db does not exist then
         CONNECT to 'users.db'
-        RUN SQL ''' create table users (username test,password,text)'''
+        RUN SQL ''' create table users (username TEXT,password TEXT)'''
         commmit SQL
         close CONNECT
     end if
-    start up START SCREEN UI
-    UI CHOICE (SCREEN 1)
-    MATCH choice
-        CASE Login
-            int fail_count = 0 
-            while fail_count < 5 do
-                LOGIN SCREEN UI
-                get username,password from UI
-                if FUNCTION login success then
-                    FUNCTION homepage(username,password)
-                else then
-                    fail_count + 1
-                end if
-            end while 
-            PROGRAMME EXIT #failed too many times 
-        CASE Signup
-            UI SCREEN
+    BOOL login = False
+    while login = False do 
+        start up START SCREEN UI
+        UI CHOICE (SCREEN 1)
+        MATCH choice
+            CASE Login
+                int var fail_count = 0 
+                while fail_count < 5 do
+                    LOGIN SCREEN UI
+                    get username,password from UI
+                    if FUNCTION login success then
+                        login = True
+                        exit while
+                    else then
+                        fail_count + 1
+                    end if
+                end while
+                if login = False then
+                    PROGRAMME EXIT #failed too many times 
+                endif
+            CASE Signup
+                UI SCREEN SIGNUP
+                int var fail_count = 0
+                while fail_count < 5 do
+                    UI get username,password, confirmpassword
+                    if FUNCTION new_credentials_add(username,password,confirmpassword) success then
+                        exit while # will go back to start screen ui
+                    else 
+                        fail_count + 1
+                    end if
+                endwhile 
+                if fail_count >=5 then 
+                    PROGRAMME EXIT #too many failures
+                endif
+        end MATCH
+    endwhile
+    FUNCTION homepage(username,password)
+endPROCEDURE
