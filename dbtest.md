@@ -1,14 +1,16 @@
-FUNCTION new_credentials_add (username,password,confirmpassowrd) returns bool
+FUNCTION new_credentials_add (username,password,confirmpassword) returns bool
     if password != confirmpassword OR username.isempty() or password.isempty()
         return False
     endif 
     CONNECT to 'users.db'
-    RUN SQL ''' select * from 'users.db' where user like username '''
+    RUN SQL ''' select * from users where user like '{username}' '''
     if SQL returns entry then
         close CONNECT
         return false
     else 
-        RUN SQL ''' INSERT INTO users VALUES (username,password)
+        string var hash_password = ''
+        hashed_password = FUNCTION hasher(password)
+        RUN SQL ''' INSERT INTO users VALUES ('{username}','{hashed_password}')
         close CONNECT
         return true
     endif
@@ -24,6 +26,14 @@ FUNCTION login (username,password) returns bool
     else 
         return False
     endif
+endFUNCTION
+
+FUNCTION hasher(password) returns string
+    ENCODE password as ascii
+    var str output = '' 
+    output = hashlib.sha256(password)
+    output = output.hexdigest()
+    RETURN output
 endFUNCTION
 
 
