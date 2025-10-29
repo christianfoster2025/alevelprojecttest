@@ -63,7 +63,7 @@ PROCEDURE startup() returns none
                     end if
                 end while
                 if login = False then
-                    PROGRAMME EXIT #failed too many times 
+                    return [False] 
                 endif
             CASE Signup
                 UI SCREEN SIGNUP
@@ -77,9 +77,26 @@ PROCEDURE startup() returns none
                     end if
                 endwhile 
                 if fail_count >=5 then 
-                    PROGRAMME EXIT #too many failures
+                    return [False] 
                 endif
         end MATCH
     endwhile
-    FUNCTION homepage(username,password)
+    return [True,(username,password)]
+endPROCEDURE
+
+
+
+PROCEDURE main() returns none
+    VAR list startup_output = ''
+    VAR bool login = False
+    WHILE login = False do 
+        startup_output = startup() #startup returns a list with a bool and a tuple, 
+        if startup_output[0] = True then 
+            login = True
+        endif 
+    endwhlie
+    VAR tuple credentials = ()
+    credentials = startup_output[1] 
+    FUNCTION homepage(username = credentials[0],password = credentials[1])
+
 endPROCEDURE
