@@ -3,8 +3,7 @@ import re
 import socket
 
 contactlist  = {
-    'homepc': '3C:7C:3F:22:DC:E2',
-    'macbook': '1a:50:63:84:da:64'
+  ...
 }
 
 

@@ -1,4 +1,4 @@
-FUNCTION new_credentials_add (username,password,confirmpassword) returns bool
+FUNCTION sign_up (username,password,confirmpassword) returns bool
     if password != confirmpassword OR username.isempty() or password.isempty()
         return False
     endif 
@@ -39,7 +39,7 @@ FUNCTION hasher(password) returns string
 endFUNCTION
 
 
-PROCEDURE startup() returns list
+FUNCTION startup() returns list
     #start with DB check
     if path programme.db does not exist then
         CONNECT to 'programme.db'
@@ -74,7 +74,7 @@ PROCEDURE startup() returns list
                 int var fail_count = 0
                 while fail_count < 5 do
                     UI get username,password, confirmpassword
-                    if FUNCTION new_credentials_add(username,password,confirmpassword) success then
+                    if FUNCTION sign_up(username,password,confirmpassword) success then
                         exit while # will go back to start screen ui
                     else 
                         fail_count + 1
@@ -86,7 +86,7 @@ PROCEDURE startup() returns list
         end MATCH
     endwhile
     return [True,(username,password)]
-endPROCEDURE
+endFUNCTION
 
 
 
