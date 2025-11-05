@@ -1,3 +1,4 @@
+```
 FUNCTION sign_up (username,password,confirmpassword) returns bool
     if password != confirmpassword OR username.isempty() or password.isempty()
         return False
@@ -105,3 +106,4 @@ PROCEDURE main() returns none
     FUNCTION homepage(username,password)
 
 endPROCEDURE
+```

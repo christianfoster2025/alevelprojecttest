@@ -1,3 +1,4 @@
+```
 required libraries: cryptography, socket, datetime
 
 FUNCTION encryption(message, mode)
@@ -24,8 +25,7 @@ FUNCTION wifi_receive_message() -> returns message
 
 
 
-
-    
+# finish this bit, need to update to database, consider making it its own function , add decrypt, add stuff for receiving read receipts, add bit in to go from local ip to mac address then look this up in contacts for sender in db record     
         # Establish connection with client.
         connection, address = wifilink.accept()
         #print ('Got connection from', addr )
@@ -87,3 +87,4 @@ FUNCTION wifi_send_message(message:string,recipient:str,userID:str) -> returns b
         return False
     ENDtry
 ENDFUNCTION
+```
