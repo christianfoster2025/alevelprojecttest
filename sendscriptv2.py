@@ -22,9 +22,10 @@ def MACtoIP(mac_address:str): #uses lookup table on device to find local ip of d
     for line in arp_table.splitlines():
         if mac_address.lower() in line.lower() or mac_address.lower().replace(':','-') in line.lower():
             # Extract the IP address
-            ip_address = re.findall(r'\d+\.\d+\.\d+\.\d+', line)
-            if ip_address:
-                return ip_address[0]
+            ip_match = re.search(r'\d+\.\d+\.\d+\.\d+', line)
+            if ip_match:
+                ip_address = ip_match.group()
+                return ip_address
             
     return int(a) # need to fix
 
@@ -58,15 +59,15 @@ def sendscript(message:str,macaddress): # receiver has to be one of either homep
 
 if __name__ == '__main__':
     macaddress= ''
-    while True:
-        print('choose who to send to from the following:')
-        for contact in contactlist:
-            print(contact)
-        choice = input()
-        if choice in contactlist:
-            macaddress= contactlist[choice]
-            break
-        
+    #while True:
+     #   print('choose who to send to from the following:')
+        #for contact in contactlist:
+      #      print(contact)
+        #choice = input()
+        #if choice in contactlist:
+          #  macaddress= contactlist[choice]
+           # break
+    macaddress= input('enter mac')    
     message = input('enter message:')
     sendscript(message, macaddress)
     

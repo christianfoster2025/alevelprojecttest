@@ -45,7 +45,7 @@ FUNCTION startup() returns list
         CONNECT to 'programme.db'
         RUN SQL ''' create table users (userID TEXT, username TEXT,password TEXT, private_key TEXT)'''
         RUN SQL ''' create table messages (timestamp TEXT,senderID TEXT,receiverID TEXT, contents TEXT)'''
-        RUN SQL ''' create table contacts (contactID TEXT,userID TEXT, public_key TEXT, wifi_mac_address TEXT, bluetooth_mac_address TEXT)'''
+        RUN SQL ''' create table contacts (alias TEXT, contactID TEXT,userID TEXT, public_key TEXT, wifi_mac_address TEXT, bluetooth_mac_address TEXT)'''
         commmit SQL
         close CONNECT
     end if
