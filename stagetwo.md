@@ -18,7 +18,10 @@ FUNCTION wifi_receive_message() -> returns message
     wifi_connection.listen(5)    
     global var bool receive_running = True
     while receive_running do 
+        connection, sender = wifilink.accept()
+        receivedmessage =str(connection.recv(1024))
 
+        
 
 
 
@@ -26,10 +29,14 @@ FUNCTION wifi_receive_message() -> returns message
 
 
 # finish this bit, need to update to database, consider making it its own function , add decrypt, add stuff for receiving read receipts, add bit in to go from local ip to mac address then look this up in contacts for sender in db record     
-        # Establish connection with client.
-        connection, address = wifilink.accept()
+        
+        
+
+
+
+
+
         #print ('Got connection from', addr )
-        receivedmessage =str(c.recv(1024))
         
         print(f'{addr}: {receivedmessage[2:-1]}')
         # send a thank you message to the client.
@@ -39,7 +46,37 @@ FUNCTION wifi_receive_message() -> returns message
         c.close()
 endFUNCTION
 
-
+FUNCTION arp_lookup(address,mode) #mode is either mac_2_ip or ip_2_mac
+    arp_table = os.popen('arp -a').read()
+    match mode 
+        case mac_2_ip:
+            for line in arp_table.splitlines() do
+                if address.lower() in line.lower() OR address.lower().replace(':','-') in line.lower() then
+                    ip_address = re.findall(r'\d+\.\d+\.\d+\.\d+', line)
+                    if ip_address then
+                        ip_address = str(ip_address[0])
+                    else then
+                        return False
+                    endif
+                else then
+                    return False
+                endif
+            endfor
+        case ip_2_mac do
+            for line in arp_table.splitlines() do
+                if address in line then
+                    mac_address = re.findall(r'([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}|([0-9A-Fa-f]{2}-){5}[0-9A-Fa-f]{2}|([0-9A-Fa-f]{4}\.){2}[0-9A-Fa-f]{4}', line)
+                    if mac_address then
+                        mac_address = str(mac_address[0])
+                    else then
+                    
+                        return False
+                    endif
+                else then
+                    return False
+                endif
+            endfor
+    ENDMATCH
 
 
 FUNCTION wifi_send_message(message:string,recipient:str,userID:str) -> returns bool
@@ -53,19 +90,11 @@ FUNCTION wifi_send_message(message:string,recipient:str,userID:str) -> returns b
         return False
     endif
 
-    arp_table = os.popen('arp -a').read()
-    for line in arp_table.splitlines() do
-        if mac_address.lower() in line.lower() OR mac_address.lower().replace(':','-') in line.lower() then
-            ip_match = re.search(r'\d+\.\d+\.\d+\.\d+', line)
-            if ip_match then
-                ip_address = ip_match.group()
-            else then
-                return False
-            endif
-        else then
-            return False
-        endif
-    endfor
+    ip_address = FUNCTION arp_lookup(mac_address, 'mac_2_ip')
+    if ip_address == False then
+        return false
+
+    
 
     encrypted_message = encrypt(message,encrypt=True)
     var str timestamp = str(datetime.datetime.now()).split('.')[0]

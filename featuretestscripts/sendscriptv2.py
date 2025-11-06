@@ -67,7 +67,7 @@ if __name__ == '__main__':
         #if choice in contactlist:
           #  macaddress= contactlist[choice]
            # break
-    macaddress= input('enter mac')    
+    macaddress= '1a:50:63:84:da:64'    
     message = input('enter message:')
     sendscript(message, macaddress)
     
