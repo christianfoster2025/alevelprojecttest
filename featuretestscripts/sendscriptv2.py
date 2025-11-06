@@ -27,7 +27,7 @@ def MACtoIP(mac_address:str): #uses lookup table on device to find local ip of d
                 ip_address = ip_match.group()
                 return ip_address
             
-    return int(a) # need to fix
+    return None # need to fix
 
 def wifisendmodule(ipaddress, message):
     wifilink = socket.socket()

@@ -13,6 +13,7 @@ def receiver():
     while True:
         # Establish connection with client.
         c, addr = wifilink.accept()
+        print(c,addr)
         #print ('Got connection from', addr )
         receivedmessage =str(c.recv(1024))
         
