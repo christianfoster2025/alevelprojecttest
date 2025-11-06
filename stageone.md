@@ -1,8 +1,9 @@
+```
 FUNCTION sign_up (username,password,confirmpassword) returns bool
     if password != confirmpassword OR username.isempty() or password.isempty()
         return False
     endif 
-    CONNECT to 'users.db'
+    CONNECT to 'programme.db'
     RUN SQL ''' select * from users where username like '{username}' '''
     if SQL returns entry then
         close CONNECT
@@ -19,7 +20,7 @@ endFUNCTION
 FUNCTION login (username,password) returns bool 
     var string hashed_password = '' 
     hashed_password = FUNCTION hasher(password)
-    CONNECT to 'users.db'
+    CONNECT to 'programme.db'
     RUN SQL ''' SELECT * FROM users WHERE username LIKE'{username}' AND password LIKE '{hashed_password}' '''
     if SQL returns RESULT then
         CLOSE CONNECT
@@ -41,9 +42,11 @@ endFUNCTION
 
 FUNCTION startup() returns list
     #start with DB check
-    if path users.db does not exist then
-        CONNECT to 'users.db'
-        RUN SQL ''' create table users (username TEXT,password TEXT)'''
+    if path programme.db does not exist then
+        CONNECT to 'programme.db'
+        RUN SQL ''' create table users (userID TEXT, username TEXT,password TEXT, private_key TEXT)'''
+        RUN SQL ''' create table messages (timestamp TEXT,senderID TEXT,receiverID TEXT, contents TEXT)'''
+        RUN SQL ''' create table contacts (alias TEXT, contactID TEXT,userID TEXT, public_key TEXT, wifi_mac_address TEXT, bluetooth_mac_address TEXT)'''
         commmit SQL
         close CONNECT
     end if
@@ -99,6 +102,8 @@ PROCEDURE main() returns none
     endwhlie
     VAR tuple credentials = ()
     credentials = startup_output[1] 
-    FUNCTION homepage(username = credentials[0],password = credentials[1])
+    (username,password) = credentials
+    FUNCTION homepage(username,password)
 
 endPROCEDURE
+```

@@ -1,6 +1,6 @@
 import os.path
 import sqlite3
-from hashtest import hashtext
+from featuretestscripts.hashtest import hashtext
 
 def dbcheck() -> None:
     if os.path.exists('users.db'):
