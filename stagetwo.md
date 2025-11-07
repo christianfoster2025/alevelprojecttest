@@ -25,7 +25,7 @@ FUNCTION update_message_state(new_state)
     CLOSE CONNECT
 ENDFUNCTION
 
-FUNCTION wifi_receive_message(userID) -> returns message
+FUNCTION wifi_receive_message(userID)
     wifi_connection = socket.socket()
     connection_port = 8008 
     wifi_connection.bind(('',connection_port))
@@ -38,7 +38,9 @@ FUNCTION wifi_receive_message(userID) -> returns message
         sender = arp_lookup(sender,'ip_2_mac')
         decrypted_message = FUNCTION encryption(received_message,'decrypt',userID)
         var str timestamp = str(datetime.datetime.now()).split('.')[0]
-
+        if decrypted_message == 'read' then
+            FUNCTION update_message_state('read')
+            return None
         CONNECT to 'programme.db'
         RUN SQL ''' INSERT INTO messages VALUES ('{timestamp}','{sender}','{userID}','{decrypted_message}','received')'''
         close CONNECT
@@ -46,6 +48,8 @@ FUNCTION wifi_receive_message(userID) -> returns message
         receive_connection.send(b'read')
 
         receive_connection.close()
+        return none
+        # add in some way to make ui update here
 endFUNCTION
 
 FUNCTION arp_lookup(address,mode) #mode is either mac_2_ip or ip_2_mac
@@ -112,5 +116,6 @@ FUNCTION wifi_send_message(message:string,recipient:str,userID:str) -> returns b
         CLOSE wifi_send_socket
         return False
     ENDtry
+    # add in some way to make ui update here
 ENDFUNCTION
 ```
