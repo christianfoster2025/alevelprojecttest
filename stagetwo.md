@@ -1,7 +1,21 @@
 ```
 required libraries: cryptography, socket, datetime
 
-FUNCTION encryption(message, mode)
+FUNCTION encryption(message,mode, recipient)  # mode can equal encrypt or decrypt, if recipient self then own private key used to decrypt, if a contacts details are given then it is known to be outbound and will be encrypted with their public key
+'''
+    MATCH mode
+        CASE 'encrypt' then # outbound so encrypt with recipients public key
+            CONNECT to 'programme.db'
+            RUN SQL ''' SELECT public_key FROM contacts WHERE contactID LIKE'{recipient}'; '''
+            if SQL returns RESULT then
+                public_key = SQL RESULT
+                CLOSE CONNECT
+            else 
+                CLOSE CONNECT
+                return False
+            endif
+'''
+#to be implemented if have time
     return message
 endFUNCTION
 
@@ -11,73 +25,56 @@ FUNCTION update_message_state(new_state)
     CLOSE CONNECT
 ENDFUNCTION
 
-FUNCTION wifi_receive_message() -> returns message
+FUNCTION wifi_receive_message(userID) -> returns message
     wifi_connection = socket.socket()
     connection_port = 8008 
     wifi_connection.bind(('',connection_port))
     wifi_connection.listen(5)    
     global var bool receive_running = True
     while receive_running do 
-        connection, sender = wifilink.accept()
-        receivedmessage =str(connection.recv(1024))
+        receive_connection, sender = wifi_connection.accept()
 
-        
+        received_message =str(receive_connection.recv(1024))
+        sender = arp_lookup(sender,'ip_2_mac')
+        decrypted_message = FUNCTION encryption(received_message,'decrypt',userID)
+        var str timestamp = str(datetime.datetime.now()).split('.')[0]
 
+        CONNECT to 'programme.db'
+        RUN SQL ''' INSERT INTO messages VALUES ('{timestamp}','{sender}','{userID}','{decrypted_message}','received')'''
+        close CONNECT
 
+        receive_connection.send(b'read')
 
-
-
-
-# finish this bit, need to update to database, consider making it its own function , add decrypt, add stuff for receiving read receipts, add bit in to go from local ip to mac address then look this up in contacts for sender in db record     
-        
-        
-
-
-
-
-
-        #print ('Got connection from', addr )
-        
-        print(f'{addr}: {receivedmessage[2:-1]}')
-        # send a thank you message to the client.
-        
-
-        # Close the connection with the client
-        c.close()
+        receive_connection.close()
 endFUNCTION
 
 FUNCTION arp_lookup(address,mode) #mode is either mac_2_ip or ip_2_mac
     arp_table = os.popen('arp -a').read()
     match mode 
-        case mac_2_ip:
+        case 'mac_2_ip':
             for line in arp_table.splitlines() do
                 if address.lower() in line.lower() OR address.lower().replace(':','-') in line.lower() then
                     ip_address = re.findall(r'\d+\.\d+\.\d+\.\d+', line)
                     if ip_address then
-                        ip_address = str(ip_address[0])
-                    else then
-                        return False
+                        ip_address = ip_address[0].decode('utf-8')
+                        return ip_address
                     endif
-                else then
-                    return False
                 endif
             endfor
-        case ip_2_mac do
+            return False
+        case 'ip_2_mac':
             for line in arp_table.splitlines() do
-                if address in line then
-                    mac_address = re.findall(r'([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}|([0-9A-Fa-f]{2}-){5}[0-9A-Fa-f]{2}|([0-9A-Fa-f]{4}\.){2}[0-9A-Fa-f]{4}', line)
+                if address in line.lower() then
+                    mac_address = re.findall(r'(?:[0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}', line)
                     if mac_address then
-                        mac_address = str(mac_address[0])
-                    else then
-                    
-                        return False
+                        mac_address = str(mac_address[0]).replace('-',':')
+                        return mac_address
                     endif
-                else then
-                    return False
                 endif
             endfor
+            return False
     ENDMATCH
-
+ENDFUNCTION
 
 FUNCTION wifi_send_message(message:string,recipient:str,userID:str) -> returns bool
     CONNECT to 'programme.db'
@@ -93,13 +90,13 @@ FUNCTION wifi_send_message(message:string,recipient:str,userID:str) -> returns b
     ip_address = FUNCTION arp_lookup(mac_address, 'mac_2_ip')
     if ip_address == False then
         return false
-
+    endif
     
 
-    encrypted_message = encrypt(message,encrypt=True)
+    encrypted_message = encryption(message,recipient)
     var str timestamp = str(datetime.datetime.now()).split('.')[0]
     CONNECT to 'programme.db'
-    RUN SQL ''' INSERT INTO messages VALUES ('{timestamp}','{userID}','{recipient}','{encrypted_message},'{purgatory})'''
+    RUN SQL ''' INSERT INTO messages VALUES ('{timestamp}','{userID}','{recipient}','{encrypted_message}','purgatory')'''
     close CONNECT
 
 
